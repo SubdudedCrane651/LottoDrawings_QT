@@ -85,7 +85,7 @@ def LottoChoose(choice):
                 print(f"An unexpected error occurred: {e}")
                 error_code = e.args[0] # If the error has additional arguments
                 print(f"Error code: {error_code}")
-    print(pr)
+    
     return pr
 
 class LottoDrawings():
@@ -326,7 +326,8 @@ class MyWindow(QtWidgets.QMainWindow, FormClass):
         print(Lotto)
         self.lblResults.setText(Lotto) # Update the text of lblResults        
 
-app = QtWidgets.QApplication(sys.argv)
-window = MyWindow()
-window.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = MyWindow()
+    window.show()
+    sys.exit(app.exec_())
