@@ -307,16 +307,24 @@ class MyWindow(QtWidgets.QMainWindow, FormClass):
         self.clickable_imgToutouRien.clicked.connect(self.on_ToutouRienimage_click)
 
     def on_649image_click(self):
-        self.lblResults.setText(LottoChoose(1)) # Update the text of lblResults
+        Lotto=LottoChoose(1)
+        print(Lotto)
+        self.lblResults.setText(Lotto) # Update the text of lblResults
 
     def on_LottoMaximage_click(self):
-        self.lblResults.setText(LottoChoose(2)) # Update the text of lblResults
+        Lotto=LottoChoose(2)
+        print(Lotto)
+        self.lblResults.setText(Lotto) # Update the text of lblResults
 
     def on_GrandeVieimage_click(self):
-        self.lblResults.setText(LottoChoose(3)) # Update the text of lblResults    
+        Lotto=LottoChoose(3)
+        print(Lotto)
+        self.lblResults.setText(Lotto) # Update the text of lblResults    
 
     def on_ToutouRienimage_click(self):
-        self.lblResults.setText(LottoChoose(4)) # Update the text of lblResults        
+        Lotto=LottoChoose(4)
+        print(Lotto)
+        self.lblResults.setText(Lotto) # Update the text of lblResults        
 
 app = QtWidgets.QApplication(sys.argv)
 window = MyWindow()
