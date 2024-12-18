@@ -1,11 +1,14 @@
-import sys
+import logging
+import sys,os
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QLabel
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QLabel,QMessageBox
+from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal
 import json
 import random
 import requests
+
+#logging.basicConfig(level=logging.DEBUG)
 
 # Custom QLabel class
 class ClickableLabel(QLabel):
@@ -18,7 +21,6 @@ class ClickableLabel(QLabel):
         self.clicked.emit()  # Emit the clicked signal
 
 # Load the UI file
-FormClass, _ = uic.loadUiType("Lotteries.ui")
 global drawnumbers
 drawnumbers = []
 
@@ -41,7 +43,7 @@ def LottoChoose(choice):
     try:
                 jsonfile = choose(choice)
                 url = "https://richard-perreault.com/Documents/" + jsonfile
-                print(url)
+                #print(url)
                 global lotto
                 lotto=int(choice)
                 response = requests.get(url)
@@ -85,7 +87,8 @@ def LottoChoose(choice):
                 print(f"An unexpected error occurred: {e}")
                 error_code = e.args[0] # If the error has additional arguments
                 print(f"Error code: {error_code}")
-    
+
+    print(pr)
     return pr
 
 class LottoDrawings():
@@ -96,12 +99,13 @@ class LottoDrawings():
         self.drawnumbers = drawnumbers
 
         def PrintStatus():
-            print("|\r", end="")
-            print("/\r", end="")
-            print("|\r", end="")
-            print("\\\r", end="")
-            print("|\r", end="")
-            print("/\r", end="")
+            pass
+            #print("|\r", end="")
+            #print("/\r", end="")
+            #print("|\r", end="")
+            #print("\\\r", end="")
+            #print("|\r", end="")
+            #print("/\r", end="")
 
         def PickLottoNumbers(samenumber, total):
             samenumber = 1
@@ -236,10 +240,20 @@ class LottoDrawings():
                                 PickNumbers = False
 
 
-class MyWindow(QtWidgets.QMainWindow, FormClass):
+class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setupUi(self)
+        #self.setupUi(self)
+
+        try:
+            #QMessageBox.information(self, "Debug", "Attempting to load UI file")
+            ui_path = os.path.join(os.path.dirname(__file__), "Lotteries.ui")
+            uic.loadUi(ui_path, self)
+            #self.initUI()
+            #QMessageBox.information(self, "Debug", "UI file loaded successfully")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load UI file: {e}")
+
 
         # Find the QLabel by its name (img649)
         self.img649 = self.findChild(QLabel, 'img649')
@@ -252,25 +266,33 @@ class MyWindow(QtWidgets.QMainWindow, FormClass):
         self.clickable_img649 = ClickableLabel(self.img649.parent())
         self.clickable_img649.setObjectName('img649')
         self.clickable_img649.setGeometry(self.img649.geometry())
-        self.clickable_img649.setPixmap(self.img649.pixmap())
+        img649_path = os.path.join(os.path.dirname(__file__), "images", "649.png")
+        pixmap=QtGui.QPixmap(img649_path)
+        self.clickable_img649.setPixmap(pixmap)
         self.clickable_img649.setScaledContents(True)
 
         self.clickable_imgLottoMax = ClickableLabel(self.imgLottoMax.parent())
         self.clickable_imgLottoMax.setObjectName('imgLottoMax')
         self.clickable_imgLottoMax.setGeometry(self.imgLottoMax.geometry())
-        self.clickable_imgLottoMax.setPixmap(self.imgLottoMax.pixmap())
+        imgLotto_Max_path = os.path.join(os.path.dirname(__file__), "images", "Lotto_Max.png")
+        pixmap=QtGui.QPixmap(imgLotto_Max_path)
+        self.clickable_imgLottoMax.setPixmap(pixmap)
         self.clickable_imgLottoMax.setScaledContents(True)
 
         self.clickable_imgGrandeVie = ClickableLabel(self.imgGrandeVie.parent())
         self.clickable_imgGrandeVie.setObjectName('imgGrandeVie')
         self.clickable_imgGrandeVie.setGeometry(self.imgGrandeVie.geometry())
-        self.clickable_imgGrandeVie.setPixmap(self.imgGrandeVie.pixmap())
+        imgGrande_Vie_path = os.path.join(os.path.dirname(__file__), "images", "Grande_Vie.png")
+        pixmap=QtGui.QPixmap(imgGrande_Vie_path)
+        self.clickable_imgGrandeVie.setPixmap(pixmap)
         self.clickable_imgGrandeVie.setScaledContents(True)
 
         self.clickable_imgToutouRien = ClickableLabel(self.imgToutouRien.parent())
         self.clickable_imgToutouRien.setObjectName('imgToutouRien')
         self.clickable_imgToutouRien.setGeometry(self.imgToutouRien.geometry())
-        self.clickable_imgToutouRien.setPixmap(self.imgToutouRien.pixmap())
+        imgTout_ou_rien_path = os.path.join(os.path.dirname(__file__), "images", "Tout_ou_rien.png")
+        pixmap=QtGui.QPixmap(imgTout_ou_rien_path)
+        self.clickable_imgToutouRien.setPixmap(pixmap)
         self.clickable_imgToutouRien.setScaledContents(True)
 
         # Replace the QLabel with ClickableLabel
@@ -319,12 +341,12 @@ class MyWindow(QtWidgets.QMainWindow, FormClass):
     def on_GrandeVieimage_click(self):
         Lotto=LottoChoose(3)
         print(Lotto)
-        self.lblResults.setText(Lotto) # Update the text of lblResults    
+        self.lblResults.setText(Lotto) # Update the text of lblResults
 
     def on_ToutouRienimage_click(self):
         Lotto=LottoChoose(4)
         print(Lotto)
-        self.lblResults.setText(Lotto) # Update the text of lblResults        
+        self.lblResults.setText(Lotto) # Update the text of lblResults
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
