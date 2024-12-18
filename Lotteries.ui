@@ -75,7 +75,7 @@
    </palette>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>LottoDrawings</string>
   </property>
   <widget class="QLabel" name="Lotteries">
    <property name="geometry">
@@ -96,10 +96,10 @@
   <widget class="QLabel" name="img649">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>220</x>
      <y>130</y>
-     <width>141</width>
-     <height>91</height>
+     <width>147</width>
+     <height>120</height>
     </rect>
    </property>
    <property name="text">
@@ -112,10 +112,10 @@
   <widget class="QLabel" name="imgLottoMax">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>220</x>
      <y>230</y>
-     <width>151</width>
-     <height>91</height>
+     <width>147</width>
+     <height>120</height>
     </rect>
    </property>
    <property name="text">
@@ -128,10 +128,10 @@
   <widget class="QLabel" name="imgGrandeVie">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>340</y>
-     <width>151</width>
-     <height>111</height>
+     <x>220</x>
+     <y>360</y>
+     <width>147</width>
+     <height>120</height>
     </rect>
    </property>
    <property name="text">
@@ -144,10 +144,10 @@
   <widget class="QLabel" name="imgToutouRien">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>180</x>
      <y>480</y>
-     <width>241</width>
-     <height>91</height>
+     <width>240</width>
+     <height>120</height>
     </rect>
    </property>
    <property name="text">
