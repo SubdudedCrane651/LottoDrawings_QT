@@ -81,7 +81,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>40</y>
+     <y>70</y>
      <width>221</width>
      <height>61</height>
     </rect>
@@ -161,9 +161,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>590</y>
+     <y>630</y>
      <width>571</width>
-     <height>151</height>
+     <height>111</height>
     </rect>
    </property>
    <property name="font">
@@ -176,6 +176,28 @@
    </property>
    <property name="text">
     <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="txtPicking">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>560</y>
+     <width>601</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Aptos</family>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
    </property>
   </widget>
  </widget>

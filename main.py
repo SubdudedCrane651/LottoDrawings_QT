@@ -1,10 +1,9 @@
-import logging
 import sys,os
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QLabel,QMessageBox
+from PyQt5.QtWidgets import QLabel,QMessageBox,QPushButton
 from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSignal
-import json
+from PyQt5.QtCore import pyqtSignal,QTimer,QObject
+import json,time
 import random
 import requests
 
@@ -12,12 +11,15 @@ import requests
 
 # Custom QLabel class
 class ClickableLabel(QLabel):
+    global label_global
     clicked = pyqtSignal()  # Define a signal
 
     def __init__(self, parent=None):
+        global label_global
         super().__init__(parent)
 
     def mousePressEvent(self, event):
+        global label_global
         self.clicked.emit()  # Emit the clicked signal
 
 # Load the UI file
@@ -28,7 +30,46 @@ global data
 
 global lotto
 
+timer_global = None
+
+global_label = None
+
 pr = ""
+
+def stop_timer():
+     global timer_global
+     if timer_global and timer_global.isActive():
+         timer_global.stop()
+
+def PrintText():
+    global timer_global
+    print("|\r", end="")
+    print("/\r", end="")
+    print("|\r", end="")
+    print("\\\r", end="")
+    print("|\r", end="")
+    print("/\r", end="")
+  
+def PrintStatus(count2):
+            #pass
+            global label_global
+            global reset
+
+            if label_global:
+                if count2==0:
+                    label_global.setText("<p>Picking </p>")
+                    reset=True
+                elif count2==1:    
+                    label_global.setText("<p>Picking .</p>")
+                elif count2==2:    
+                    label_global.setText("<p>Picking ..</p>")
+                elif count2==3:    
+                    label_global.setText("<p>Picking ...</p>")
+                elif count2==4:    
+                    label_global.setText("<p>Picking ....</p>")
+                elif count2==5:    
+                    label_global.setText("<p>Picking ......</p>")
+                    reset=False
 
 def choose(i):
     switcher = {
@@ -45,6 +86,9 @@ def LottoChoose(choice):
                 url = "https://richard-perreault.com/Documents/" + jsonfile
                 #print(url)
                 global lotto
+                global label_global
+                global timer_global
+                global Stop
                 lotto=int(choice)
                 response = requests.get(url)
                 global data
@@ -88,26 +132,31 @@ def LottoChoose(choice):
                 error_code = e.args[0] # If the error has additional arguments
                 print(f"Error code: {error_code}")
 
+    
     print(pr)
     return pr
 
-class LottoDrawings():
+class LottoDrawings(QObject):
+    update_label_signal = pyqtSignal(int)
+    computation_done_signal = pyqtSignal(str)
+
     def __init__(self, rangenum, drawingnum, same, drawnumbers):
+        super().__init__()
         self.rangenum = rangenum
         self.drawingnum = drawingnum
         self.same = same
         self.drawnumbers = drawnumbers
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.process_data)
 
-        def PrintStatus():
-            pass
-            #print("|\r", end="")
-            #print("/\r", end="")
-            #print("|\r", end="")
-            #print("\\\r", end="")
-            #print("|\r", end="")
-            #print("/\r", end="")
+        stop_timer()
+
+        # Connect the signals to their respective slots
+        self.update_label_signal.connect(self.update_label_text)
+        #self.computation_done_signal.connect(self.computation_done)
 
         def PickLottoNumbers(samenumber, total):
+            global label_global,Stop
             samenumber = 1
             count2 = 0
             for number in numbers:
@@ -125,8 +174,11 @@ class LottoDrawings():
         PickNumbers = True
 
         hits = 0
+        
 
         while PickNumbers or hits > 0:
+
+            global label_global,Stop
 
             numbers = []
 
@@ -151,13 +203,25 @@ class LottoDrawings():
             self.drawnumbers = numbers
 
             with open("LottoDrawings.txt", 'w+') as File:
+                global label_global,timer_global
+
+                global reset
+                reset=True
+                count2=0
 
                 for pan in data:
 
-                    PrintStatus()
+                    #PrintText()
+
+                    #PrintStatus(count2)
 
                     hit = 0
 
+                    count2+=1
+
+                    if not reset:
+                        count2=0
+                    
                     #Lotto 6/49 Drawings
                     if lotto == 1:
 
@@ -169,7 +233,8 @@ class LottoDrawings():
                                 hit += 1
                         if hit == 6:
                             PickNumbers = True
-                            File.write(pan["Drawdate"] + ", ")
+                            with open("LottoDrawings.txt", 'a+') as File:
+                                File.write(pan["Drawdate"] + ", ")
                             hits += 1
                         else:
                             PickNumbers = False
@@ -185,39 +250,24 @@ class LottoDrawings():
                                 hit += 1
                             if hit == 4 or hit == 7:
                                 PickNumbers = True
-                                File.write(pan["Drawdate"] + ", ")
+                                with open("LottoDrawings.txt", 'a+') as File:
+                                    File.write(pan["Drawdate"] + ", ")
                                 hits += 1
                             else:
                                 PickNumbers = False
 
                     #Grande Vie Drawings
-                    elif lotto == 3:
-
-                        if numbers[0] == int(pan["p1"]) and numbers[1] == int(pan["p2"]) \
-                        and numbers[2] == int(pan["p3"]) and numbers[3] == int(pan["p4"])\
-                        and numbers[4] == int(pan["p5"]):
-                            PickNumbers = True
-                            File.write(pan["Drawdate"] + ", ")
-                            hits = +1
-                        else:
-                            PickNumbers = False
-
-                        if numbers[0] == int(pan["p1"]) and numbers[1] == int(pan["p2"]) \
-                        and numbers[2] == int(pan["p3"]) and numbers[3] == int(pan["p4"]) \
-                        and numbers[4] == int(pan["p5"]) and numbers[5] == int(pan["gn"]):
-                            PickNumbers = True
-                            File.write(pan["Drawdate"] + ", ")
-                            hits = +1
-                        else:
-                            PickNumbers = False
+                    if lotto == 3:
 
                         for num in range(0, 5):
                             if numbers[num] == int(pan["p1"]) or numbers[num] == int(pan["p2"]) \
-                            or numbers[num] == int(pan["p3"]) or numbers[num] == int(pan["p4"]):
+                            or numbers[num] == int(pan["p3"]) or numbers[num] == int(pan["p4"]) \
+                            or numbers[num]==int(pan["p5"]):
                                 hit += 1
-                            if hit == 2:
+                            if hit == 3 or hit==5: 
                                 PickNumbers = True
-                                File.write(pan["Drawdate"] + ", ")
+                                with open("LottoDrawings.txt", 'a+') as File:
+                                   File.write(pan["Drawdate"] + ", ")
                                 hits += 1
                             else:
                                 PickNumbers = False
@@ -234,16 +284,49 @@ class LottoDrawings():
                                 hit += 1
                             if hit == 12:
                                 PickNumbers = True
-                                File.write(pan["Drawdate"] + ", ")
+                                with open("LottoDrawings.txt", 'a+') as File:
+                                   File.write(pan["Drawdate"] + ", ")
                                 hits += 1
                             else:
                                 PickNumbers = False
 
+    
+    def start_timer(self):
+        self.timer.start(100)  # Update every 100 milliseconds
 
+    def stop_timer(self):
+        self.timer.stop()
+
+    def process_data(self):
+        global reset, global_label                                
+
+    def update_label_text(self, count2):
+            global global_label
+            if global_label:
+                if count2 == 0:
+                    global_label.setText("<p>Picking .</p>")
+                    print("|\r", end="")
+                elif count2 == 1:
+                    global_label.setText("<p>Picking ..</p>")
+                    print("/\r", end="")
+                elif count2 == 2:
+                    global_label.setText("<p>Picking ..</p>")
+                    print("|\r", end="")
+                elif count2 == 3:
+                    global_label.setText("<p>Picking ...</p>")
+                    print("\\\r", end="")
+                elif count2 == 4:
+                    global_label.setText("<p>Picking ....</p>")
+                    print("|\r", end="")
+                elif count2 == 5:
+                    global_label.setText("<p>Picking ......</p>")
+                    print("/\r", end="")                                
+                                
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         #self.setupUi(self)
+        global Stop
 
         try:
             #QMessageBox.information(self, "Debug", "Attempting to load UI file")
@@ -260,8 +343,13 @@ class MyWindow(QtWidgets.QMainWindow):
         self.imgLottoMax = self.findChild(QLabel, 'imgLottoMax')
         self.imgGrandeVie = self.findChild(QLabel, 'imgGrandeVie')
         self.imgToutouRien = self.findChild(QLabel, 'imgToutouRien')
+        global label_global,timer_global
         self.lblResults = self.findChild(QLabel, 'lblResults') # Find the lblResults label
-
+        self.txtPicking = self.findChild(QLabel, 'txtPicking') # Find the lblResults label
+        # label_global=QLabel("<p>Picking</p>",self)
+        # font = QtGui.QFont("Arial", 20, QtGui.QFont.Bold)
+        # label_global.setFont(font)
+        # label_global.setFixedSize(300, 50)
         # Create an instance of ClickableLabel and bind it to the QLabel
         self.clickable_img649 = ClickableLabel(self.img649.parent())
         self.clickable_img649.setObjectName('img649')
@@ -328,24 +416,50 @@ class MyWindow(QtWidgets.QMainWindow):
             # Connect the clicked signal to a slot function
         self.clickable_imgToutouRien.clicked.connect(self.on_ToutouRienimage_click)
 
+        #self.button = QPushButton("Start Animation", self)
+        #layout.addWidget(self.button)
+         # Connect the button's clicked signal to start the timer
+        #self.button.clicked.connect(self.start_timer)
+
+        timer_global = QTimer(self) 
+        timer_global.timeout.connect(self.update_status)
+        self.counter = 0
+
+    def start_timer(self):
+        timer_global.start(100) # Update every 100 milliseconds
+
+    def stop_timer(self):
+        timer_global.stop() # Stop the timeer    
+
+    def update_status(self):
+        PrintStatus(self.counter) 
+        self.counter += 1 
+        if self.counter > 6:
+            self.counter = 0        
+
     def on_649image_click(self):
+        #self.start_timer()
+        self
         Lotto=LottoChoose(1)
-        print(Lotto)
+        #print(Lotto)
         self.lblResults.setText(Lotto) # Update the text of lblResults
 
     def on_LottoMaximage_click(self):
+        #self.start_timer()
         Lotto=LottoChoose(2)
-        print(Lotto)
+        #print(Lotto)
         self.lblResults.setText(Lotto) # Update the text of lblResults
 
     def on_GrandeVieimage_click(self):
+        #self.start_timer()
         Lotto=LottoChoose(3)
-        print(Lotto)
+        #print(Lotto)
         self.lblResults.setText(Lotto) # Update the text of lblResults
 
     def on_ToutouRienimage_click(self):
+        #self.start_timer()
         Lotto=LottoChoose(4)
-        print(Lotto)
+        #print(Lotto)
         self.lblResults.setText(Lotto) # Update the text of lblResults
 
 if __name__ == "__main__":
